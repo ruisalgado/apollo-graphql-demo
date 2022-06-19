@@ -1,6 +1,25 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { useGetAllUsersQuery } from './generated/graphql';
+
+const UsersList = () => {
+  const { loading, data, error } = useGetAllUsersQuery();
+
+  if (loading) return <h1>loading</h1>;
+  if (error) return <h1>Error {JSON.stringify(error)}</h1>;
+
+  return (
+      <>
+          <h1>Users:</h1>
+          <ul>
+              {data?.getUsers.map((user, idx) => (
+                  <li key={user.name + idx}>{user.name}</li>
+              ))}
+          </ul>
+      </>
+  );
+};
 
 function App() {
   return (
@@ -19,6 +38,7 @@ function App() {
           Learn React
         </a>
       </header>
+      <UsersList />
     </div>
   );
 }
