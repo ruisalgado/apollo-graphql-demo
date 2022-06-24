@@ -1,14 +1,36 @@
-query getAllUsers {
-	getUsers {
-		id
-		name
-	}
+fragment AbbreviatedToDo on ToDo {
+  id
+  order
+  title
+  status
+  stepsCompleted
+  stepsCount
 }
 
-mutation updateUser($id: Int!, $name: String!, $email: String!) {
-	updateUser(id: $id, input: { name: $name, email: $email }) {
-		id
-		name
-		email
-	}
+fragment DetailedToDo on ToDo {
+  ...AbbreviatedToDo,
+  body
+  steps {
+    id
+    title
+    completed
+  }
+}
+
+query visibleToDos {
+  todos(statuses: [OPEN, CLOSED]) {
+    ...AbbreviatedToDo
+  }
+}
+
+query toDo($id: ID!) {
+  todo(id: $id) {
+    ...DetailedToDo
+  }
+}
+
+mutation addToDo($title: String!) {
+  createToDo(title: $title) {
+    ...DetailedToDo
+  }
 }

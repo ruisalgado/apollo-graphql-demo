@@ -4,6 +4,7 @@ import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { NavigationContextProvider } from './NavigationContext';
 
 const apolloClient = new ApolloClient({
   uri: "http://localhost:4000",
@@ -17,7 +18,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <ApolloProvider client={apolloClient}>
-      <App />
+      <NavigationContextProvider>
+        <App />
+      </NavigationContextProvider>
     </ApolloProvider>
   </React.StrictMode>
 );

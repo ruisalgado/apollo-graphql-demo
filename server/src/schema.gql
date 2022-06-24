@@ -1,3 +1,36 @@
+type Step {
+  id: ID!
+  title: String!
+  completed: Boolean!
+}
+
+enum ToDoStatus {
+  OPEN
+  CLOSED
+  DELETED
+}
+
+type ToDo {
+  id: ID!
+  order: Int!
+  title: String!
+  body: String!
+  status: ToDoStatus!
+  steps: [Step!]!
+  stepsCompleted: Int!
+  stepsCount: Int!
+}
+
+input SortToDosInput {
+  id: ID!
+  order: Int!
+}
+
+input EditToDoChanges {
+  title: String
+  body: String
+}
+
 input UserInput {
     email: String!
     name: String!
@@ -10,11 +43,17 @@ type User {
 }
 
 type Mutation {
-    createUser(input: UserInput): User
-    updateUser(id: Int!, input: UserInput): User
+  createToDo(title: String!): ToDo!
+  closeToDo(id: ID!): ToDo!
+  openToDo(id: ID!): ToDo!
+  editToDo(id: ID!, changes: EditToDoChanges!): ToDo!
+  sortToDos(changes: [SortToDosInput!]!): [ToDo!]!
+  addToDoStep(toDo: ID!, title: String!): Step!
+  openStep(id: ID!): Step!
+  closeStep(id: ID!): Step!
 }
 
 type Query {
-    getUser(id: String): User
-    getUsers: [User!]!
+  todos(statuses: [ToDoStatus!]): [ToDo!]!
+  todo(id: ID!): ToDo!
 }
