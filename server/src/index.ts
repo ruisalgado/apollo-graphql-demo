@@ -3,58 +3,43 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
 
-interface Step {
+interface Attachment {
   id: string;
-  title: string;
-  completed: boolean;
+  name: string;
 }
 
 interface ToDo {
   id: string;
-  order: number;
   title: string;
-  body: string;
+  body?: string;
   status: "OPEN" | "CLOSED" | "DELETED";
-  steps: Array<Step>;
+  attachments?: Array<Attachment>;
 }
 
 const todos: ToDo[] = [
   {
     id: randomUUID(),
-    order: 1,
     title: "first todo",
-    body: "",
     status: "OPEN",
-    steps: [],
   },
   {
     id: randomUUID(),
-    order: 2,
     title: "second todo",
-    body: "",
     status: "OPEN",
-    steps: [
+    attachments: [
       {
         id: randomUUID(),
-        title: "step 1",
-        completed: false,
+        name: "attachment_1.pdf",
       },
       {
         id: randomUUID(),
-        title: "step 2",
-        completed: true,
+        name: "attachment_2.pdf",
       }
     ],
   }
 ];
 
 // ToDo helpers
-const nextTodoId = (): string => randomUUID();
-const nextTodoOrder = (): number => {
-  const increment = 1000;
-  const largerOrder = todos.map(todo => todo.order).sort((a, b) => a - b)[0] || 0;
-  return largerOrder + increment;
-};
 const getTodoById = (id: string): ToDo => {
   const todo = todos.find(todo => todo.id === id);
   if (!todo) throw new Error(`ToDo ${id} not found`);
@@ -66,20 +51,16 @@ const updateTodo = (id: string, mutator: (todo: ToDo) => void): ToDo => {
   return todo;
 };
 
-// Step helpers
-const nextStepId = (): string => randomUUID();
-const getStepById = (id: string): Step => {
-  const step = todos.flatMap(todo => todo.steps).find(step => step.id === id);
-  if (!step) throw new Error(`Step ${id} not found`);
-  return step;
-};
+// other helpers
+const delay = async (milli: number) => await new Promise(resolve => setTimeout(resolve, milli));
 
 const typeDefs = gql(readFileSync(join(__dirname, "./schema.gql"), "utf-8"));
 
 const resolvers = {
   ToDo: {
-    stepsCompleted: (todo: ToDo) => todo.steps.filter(step => step.completed).length,
-    stepsCount: (todo: ToDo) => todo.steps.length,
+    body: (todo: ToDo) => todo.body || "",
+    attachments: (todo: ToDo) => todo.attachments || [],
+    attachmentCount: (todo: ToDo) => todo.attachments?.length || 0,
   },
   Query: {
     todos: (_: never, variables: { statuses: Array<ToDo['status']> }) => {
@@ -95,12 +76,9 @@ const resolvers = {
   Mutation: {
     createToDo: (_: never, variables: { title: string }): ToDo => {
       const todo: ToDo = {
-        id: nextTodoId(),
-        order: nextTodoOrder(),
+        id: randomUUID(),
         title: variables.title,
-        body: "",
         status: "OPEN",
-        steps: [],
       };
       todos.push(todo);
       return todo;
@@ -111,32 +89,38 @@ const resolvers = {
     openToDo: (_: never, variables: { id: string }): ToDo => {
       return updateTodo(variables.id, todo => todo.status = "OPEN");
     },
-    editToDo: (_: never, variables: { id: string, changes: { title?: string, body?: string }}): ToDo => {
+    editToDo: async (_: never, variables: { id: string, changes: { title?: string, body?: string }}): Promise<ToDo> => {
+      // use to demo optimistic response
+      // await delay(3000);
+      // if (true) throw "oops";
       return updateTodo(variables.id, todo => {
         const { title, body } = variables.changes;
         todo.title = title || todo.title;
         todo.body = body || todo.body;
       });
     },
-    addToDoStep: (_: never, variables: { toDo: string, title: string }): Step => {
+    deleteToDo: (_: never, variables: { id: string }): boolean => {
+      updateTodo(variables.id, todo => todo.status = "DELETED");
+      return true;
+    },
+    addAttachment: (_: never, variables: { toDo: string, name: string }): Attachment => {
       const todo = getTodoById(variables.toDo);
-      const step: Step = {
-        id: nextStepId(),
-        title: variables.title,
-        completed: false,
+      const attachment: Attachment = {
+        id: randomUUID(),
+        name: variables.name,
       };
-      todo.steps.push(step);
-      return step;
+      todo.attachments = [...(todo.attachments || []), attachment];
+      return attachment;
     },
-    closeStep: (_: never, variables: { id: string }): Step => {
-      const step = getStepById(variables.id);
-      step.completed = true;
-      return step;
-    },
-    openStep: (_: never, variables: { id: string }): Step => {
-      const step = getStepById(variables.id);
-      step.completed = false;
-      return step;
+    removeAttachment: (_: never, variables: { id: string }): boolean => {
+      const attachmentId = variables.id;
+      const todo = todos.find(todo => {
+        return (todo.attachments || []).map(att => att.id).includes(attachmentId);
+      });
+      if (todo) {
+        todo.attachments = (todo.attachments || []).filter(att => att.id !== attachmentId);
+      }
+      return true;
     },
   }
 };

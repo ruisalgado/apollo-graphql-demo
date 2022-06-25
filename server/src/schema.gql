@@ -1,7 +1,6 @@
-type Step {
+type Attachment {
   id: ID!
-  title: String!
-  completed: Boolean!
+  name: String!
 }
 
 enum ToDoStatus {
@@ -12,18 +11,11 @@ enum ToDoStatus {
 
 type ToDo {
   id: ID!
-  order: Int!
   title: String!
-  body: String!
   status: ToDoStatus!
-  steps: [Step!]!
-  stepsCompleted: Int!
-  stepsCount: Int!
-}
-
-input SortToDosInput {
-  id: ID!
-  order: Int!
+  body: String!
+  attachments: [Attachment!]!
+  attachmentCount: Int!
 }
 
 input EditToDoChanges {
@@ -31,26 +23,14 @@ input EditToDoChanges {
   body: String
 }
 
-input UserInput {
-    email: String!
-    name: String!
-}
-
-type User {
-    id: Int!
-    name: String!
-    email: String!
-}
-
 type Mutation {
   createToDo(title: String!): ToDo!
   closeToDo(id: ID!): ToDo!
   openToDo(id: ID!): ToDo!
   editToDo(id: ID!, changes: EditToDoChanges!): ToDo!
-  sortToDos(changes: [SortToDosInput!]!): [ToDo!]!
-  addToDoStep(toDo: ID!, title: String!): Step!
-  openStep(id: ID!): Step!
-  closeStep(id: ID!): Step!
+  deleteToDo(id: ID!): Boolean
+  addAttachment(toDo: ID!, name: String!): Attachment!
+  removeAttachment(id: ID!): Boolean!
 }
 
 type Query {

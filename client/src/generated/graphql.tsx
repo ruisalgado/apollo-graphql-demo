@@ -15,6 +15,12 @@ export type Scalars = {
   Float: number;
 };
 
+export type Attachment = {
+  __typename?: 'Attachment';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+};
+
 export type EditToDoChanges = {
   body?: InputMaybe<Scalars['String']>;
   title?: InputMaybe<Scalars['String']>;
@@ -22,25 +28,19 @@ export type EditToDoChanges = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addToDoStep: Step;
-  closeStep: Step;
+  addAttachment: Attachment;
   closeToDo: ToDo;
   createToDo: ToDo;
+  deleteToDo?: Maybe<Scalars['Boolean']>;
   editToDo: ToDo;
-  openStep: Step;
   openToDo: ToDo;
-  sortToDos: Array<ToDo>;
+  removeAttachment: Scalars['Boolean'];
 };
 
 
-export type MutationAddToDoStepArgs = {
-  title: Scalars['String'];
+export type MutationAddAttachmentArgs = {
+  name: Scalars['String'];
   toDo: Scalars['ID'];
-};
-
-
-export type MutationCloseStepArgs = {
-  id: Scalars['ID'];
 };
 
 
@@ -54,13 +54,13 @@ export type MutationCreateToDoArgs = {
 };
 
 
-export type MutationEditToDoArgs = {
-  changes: EditToDoChanges;
+export type MutationDeleteToDoArgs = {
   id: Scalars['ID'];
 };
 
 
-export type MutationOpenStepArgs = {
+export type MutationEditToDoArgs = {
+  changes: EditToDoChanges;
   id: Scalars['ID'];
 };
 
@@ -70,8 +70,8 @@ export type MutationOpenToDoArgs = {
 };
 
 
-export type MutationSortToDosArgs = {
-  changes: Array<SortToDosInput>;
+export type MutationRemoveAttachmentArgs = {
+  id: Scalars['ID'];
 };
 
 export type Query = {
@@ -90,27 +90,13 @@ export type QueryTodosArgs = {
   statuses?: InputMaybe<Array<ToDoStatus>>;
 };
 
-export type SortToDosInput = {
-  id: Scalars['ID'];
-  order: Scalars['Int'];
-};
-
-export type Step = {
-  __typename?: 'Step';
-  completed: Scalars['Boolean'];
-  id: Scalars['ID'];
-  title: Scalars['String'];
-};
-
 export type ToDo = {
   __typename?: 'ToDo';
+  attachmentCount: Scalars['Int'];
+  attachments: Array<Attachment>;
   body: Scalars['String'];
   id: Scalars['ID'];
-  order: Scalars['Int'];
   status: ToDoStatus;
-  steps: Array<Step>;
-  stepsCompleted: Scalars['Int'];
-  stepsCount: Scalars['Int'];
   title: Scalars['String'];
 };
 
@@ -120,59 +106,74 @@ export enum ToDoStatus {
   Open = 'OPEN'
 }
 
-export type User = {
-  __typename?: 'User';
-  email: Scalars['String'];
-  id: Scalars['Int'];
-  name: Scalars['String'];
-};
+export type AbbreviatedToDoFragment = { __typename?: 'ToDo', id: string, title: string, status: ToDoStatus, attachmentCount: number };
 
-export type UserInput = {
-  email: Scalars['String'];
-  name: Scalars['String'];
-};
-
-export type AbbreviatedToDoFragment = { __typename?: 'ToDo', id: string, order: number, title: string, status: ToDoStatus, stepsCompleted: number, stepsCount: number };
-
-export type DetailedToDoFragment = { __typename?: 'ToDo', body: string, id: string, order: number, title: string, status: ToDoStatus, stepsCompleted: number, stepsCount: number, steps: Array<{ __typename?: 'Step', id: string, title: string, completed: boolean }> };
+export type DetailedToDoFragment = { __typename?: 'ToDo', body: string, id: string, title: string, status: ToDoStatus, attachmentCount: number, attachments: Array<{ __typename?: 'Attachment', id: string, name: string }> };
 
 export type VisibleToDosQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type VisibleToDosQuery = { __typename?: 'Query', todos: Array<{ __typename?: 'ToDo', id: string, order: number, title: string, status: ToDoStatus, stepsCompleted: number, stepsCount: number }> };
+export type VisibleToDosQuery = { __typename?: 'Query', todos: Array<{ __typename?: 'ToDo', id: string, title: string, status: ToDoStatus, attachmentCount: number }> };
 
 export type ToDoQueryVariables = Exact<{
   id: Scalars['ID'];
 }>;
 
 
-export type ToDoQuery = { __typename?: 'Query', todo: { __typename?: 'ToDo', body: string, id: string, order: number, title: string, status: ToDoStatus, stepsCompleted: number, stepsCount: number, steps: Array<{ __typename?: 'Step', id: string, title: string, completed: boolean }> } };
+export type ToDoQuery = { __typename?: 'Query', todo: { __typename?: 'ToDo', body: string, id: string, title: string, status: ToDoStatus, attachmentCount: number, attachments: Array<{ __typename?: 'Attachment', id: string, name: string }> } };
 
 export type AddToDoMutationVariables = Exact<{
   title: Scalars['String'];
 }>;
 
 
-export type AddToDoMutation = { __typename?: 'Mutation', createToDo: { __typename?: 'ToDo', body: string, id: string, order: number, title: string, status: ToDoStatus, stepsCompleted: number, stepsCount: number, steps: Array<{ __typename?: 'Step', id: string, title: string, completed: boolean }> } };
+export type AddToDoMutation = { __typename?: 'Mutation', createToDo: { __typename?: 'ToDo', body: string, id: string, title: string, status: ToDoStatus, attachmentCount: number, attachments: Array<{ __typename?: 'Attachment', id: string, name: string }> } };
+
+export type EditToDoMutationVariables = Exact<{
+  id: Scalars['ID'];
+  title: Scalars['String'];
+  body: Scalars['String'];
+}>;
+
+
+export type EditToDoMutation = { __typename?: 'Mutation', editToDo: { __typename?: 'ToDo', body: string, id: string, title: string, status: ToDoStatus, attachmentCount: number, attachments: Array<{ __typename?: 'Attachment', id: string, name: string }> } };
+
+export type CheckToDoMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type CheckToDoMutation = { __typename?: 'Mutation', closeToDo: { __typename?: 'ToDo', body: string, id: string, title: string, status: ToDoStatus, attachmentCount: number, attachments: Array<{ __typename?: 'Attachment', id: string, name: string }> } };
+
+export type UncheckToDoMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type UncheckToDoMutation = { __typename?: 'Mutation', openToDo: { __typename?: 'ToDo', body: string, id: string, title: string, status: ToDoStatus, attachmentCount: number, attachments: Array<{ __typename?: 'Attachment', id: string, name: string }> } };
+
+export type DeleteToDoMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type DeleteToDoMutation = { __typename?: 'Mutation', deleteToDo?: boolean | null };
 
 export const AbbreviatedToDoFragmentDoc = gql`
     fragment AbbreviatedToDo on ToDo {
   id
-  order
   title
   status
-  stepsCompleted
-  stepsCount
+  attachmentCount
 }
     `;
 export const DetailedToDoFragmentDoc = gql`
     fragment DetailedToDo on ToDo {
   ...AbbreviatedToDo
   body
-  steps {
+  attachments {
     id
-    title
-    completed
+    name
   }
 }
     ${AbbreviatedToDoFragmentDoc}`;
@@ -278,3 +279,135 @@ export function useAddToDoMutation(baseOptions?: Apollo.MutationHookOptions<AddT
 export type AddToDoMutationHookResult = ReturnType<typeof useAddToDoMutation>;
 export type AddToDoMutationResult = Apollo.MutationResult<AddToDoMutation>;
 export type AddToDoMutationOptions = Apollo.BaseMutationOptions<AddToDoMutation, AddToDoMutationVariables>;
+export const EditToDoDocument = gql`
+    mutation editToDo($id: ID!, $title: String!, $body: String!) {
+  editToDo(id: $id, changes: {title: $title, body: $body}) {
+    ...DetailedToDo
+  }
+}
+    ${DetailedToDoFragmentDoc}`;
+export type EditToDoMutationFn = Apollo.MutationFunction<EditToDoMutation, EditToDoMutationVariables>;
+
+/**
+ * __useEditToDoMutation__
+ *
+ * To run a mutation, you first call `useEditToDoMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditToDoMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editToDoMutation, { data, loading, error }] = useEditToDoMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      title: // value for 'title'
+ *      body: // value for 'body'
+ *   },
+ * });
+ */
+export function useEditToDoMutation(baseOptions?: Apollo.MutationHookOptions<EditToDoMutation, EditToDoMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditToDoMutation, EditToDoMutationVariables>(EditToDoDocument, options);
+      }
+export type EditToDoMutationHookResult = ReturnType<typeof useEditToDoMutation>;
+export type EditToDoMutationResult = Apollo.MutationResult<EditToDoMutation>;
+export type EditToDoMutationOptions = Apollo.BaseMutationOptions<EditToDoMutation, EditToDoMutationVariables>;
+export const CheckToDoDocument = gql`
+    mutation checkToDo($id: ID!) {
+  closeToDo(id: $id) {
+    ...DetailedToDo
+  }
+}
+    ${DetailedToDoFragmentDoc}`;
+export type CheckToDoMutationFn = Apollo.MutationFunction<CheckToDoMutation, CheckToDoMutationVariables>;
+
+/**
+ * __useCheckToDoMutation__
+ *
+ * To run a mutation, you first call `useCheckToDoMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCheckToDoMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [checkToDoMutation, { data, loading, error }] = useCheckToDoMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCheckToDoMutation(baseOptions?: Apollo.MutationHookOptions<CheckToDoMutation, CheckToDoMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CheckToDoMutation, CheckToDoMutationVariables>(CheckToDoDocument, options);
+      }
+export type CheckToDoMutationHookResult = ReturnType<typeof useCheckToDoMutation>;
+export type CheckToDoMutationResult = Apollo.MutationResult<CheckToDoMutation>;
+export type CheckToDoMutationOptions = Apollo.BaseMutationOptions<CheckToDoMutation, CheckToDoMutationVariables>;
+export const UncheckToDoDocument = gql`
+    mutation uncheckToDo($id: ID!) {
+  openToDo(id: $id) {
+    ...DetailedToDo
+  }
+}
+    ${DetailedToDoFragmentDoc}`;
+export type UncheckToDoMutationFn = Apollo.MutationFunction<UncheckToDoMutation, UncheckToDoMutationVariables>;
+
+/**
+ * __useUncheckToDoMutation__
+ *
+ * To run a mutation, you first call `useUncheckToDoMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUncheckToDoMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uncheckToDoMutation, { data, loading, error }] = useUncheckToDoMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useUncheckToDoMutation(baseOptions?: Apollo.MutationHookOptions<UncheckToDoMutation, UncheckToDoMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UncheckToDoMutation, UncheckToDoMutationVariables>(UncheckToDoDocument, options);
+      }
+export type UncheckToDoMutationHookResult = ReturnType<typeof useUncheckToDoMutation>;
+export type UncheckToDoMutationResult = Apollo.MutationResult<UncheckToDoMutation>;
+export type UncheckToDoMutationOptions = Apollo.BaseMutationOptions<UncheckToDoMutation, UncheckToDoMutationVariables>;
+export const DeleteToDoDocument = gql`
+    mutation deleteToDo($id: ID!) {
+  deleteToDo(id: $id)
+}
+    `;
+export type DeleteToDoMutationFn = Apollo.MutationFunction<DeleteToDoMutation, DeleteToDoMutationVariables>;
+
+/**
+ * __useDeleteToDoMutation__
+ *
+ * To run a mutation, you first call `useDeleteToDoMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteToDoMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteToDoMutation, { data, loading, error }] = useDeleteToDoMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteToDoMutation(baseOptions?: Apollo.MutationHookOptions<DeleteToDoMutation, DeleteToDoMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteToDoMutation, DeleteToDoMutationVariables>(DeleteToDoDocument, options);
+      }
+export type DeleteToDoMutationHookResult = ReturnType<typeof useDeleteToDoMutation>;
+export type DeleteToDoMutationResult = Apollo.MutationResult<DeleteToDoMutation>;
+export type DeleteToDoMutationOptions = Apollo.BaseMutationOptions<DeleteToDoMutation, DeleteToDoMutationVariables>;

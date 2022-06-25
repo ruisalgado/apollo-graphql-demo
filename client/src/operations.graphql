@@ -1,19 +1,16 @@
 fragment AbbreviatedToDo on ToDo {
   id
-  order
   title
   status
-  stepsCompleted
-  stepsCount
+  attachmentCount
 }
 
 fragment DetailedToDo on ToDo {
   ...AbbreviatedToDo,
   body
-  steps {
+  attachments {
     id
-    title
-    completed
+    name
   }
 }
 
@@ -33,4 +30,26 @@ mutation addToDo($title: String!) {
   createToDo(title: $title) {
     ...DetailedToDo
   }
+}
+
+mutation editToDo($id: ID!, $title: String!, $body: String!) {
+  editToDo(id: $id, changes: { title: $title, body: $body }) {
+    ...DetailedToDo
+  }
+}
+
+mutation checkToDo($id: ID!) {
+  closeToDo(id: $id) {
+    ...DetailedToDo
+  }
+}
+
+mutation uncheckToDo($id: ID!) {
+  openToDo(id: $id) {
+    ...DetailedToDo
+  }
+}
+
+mutation deleteToDo($id: ID!) {
+  deleteToDo(id: $id)
 }
