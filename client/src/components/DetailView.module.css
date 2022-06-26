@@ -1,0 +1,33 @@
+.attachmentsList {
+  padding: 0;
+}
+
+.attachmentsList li {
+  list-style: none;
+}
+
+.attachmentsList li + li {
+  margin-top: 0.5rem;
+}
+
+.todoForm {
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  grid-gap: 1rem 0.5rem;
+  justify-content: end;
+  width: 100%;
+  padding: 1rem 0;
+}
+
+.todoForm label {
+  grid-column: 1 / 2;
+  justify-self: end;
+  padding: 0.5rem 0;
+  opacity: 0.6;
+}
+
+.todoForm input,
+.todoForm textarea {
+  grid-column: 2 / 2;
+  padding: 0.5rem;
+}

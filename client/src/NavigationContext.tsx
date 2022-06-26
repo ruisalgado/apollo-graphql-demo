@@ -1,6 +1,6 @@
 import React from "react";
-import { DetailView } from "./views/DetailView";
-import { ListView } from "./views/ListView";
+import { DetailView } from "./components/DetailView";
+import { ListView } from "./components/ListView";
 
 type View = 'ListView' | ['DetailView', { toDoId: string }];
 

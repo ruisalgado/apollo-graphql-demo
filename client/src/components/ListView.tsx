@@ -10,6 +10,9 @@ import {
   useUncheckToDoMutation,
   useVisibleToDosQuery,
 } from "../generated/graphql";
+import { SubHeader } from "./Headers";
+import { ButtonRow, Card, Section } from "./Containers";
+import styles from "./ListView.module.css";
 
 const ToDoList = (props: {
   title: string,
@@ -19,21 +22,30 @@ const ToDoList = (props: {
   onDelete?: (todo: AbbreviatedToDoFragment) => void,
 }) => {
   const { title, todos, onToggle, onEdit, onDelete } = props;
+  if (!todos.length) return null;
+
+  const decorate = (todo: AbbreviatedToDoFragment) => ({
+    ...todo,
+    checked: todo.status === "CLOSED",
+  });
+
   return (
-    <>
-        <h1>{title}</h1>
-        <ul>
-            {todos.map(todo => (
-                <li key={todo.id}>
-                  <input type="checkbox" checked={todo.status === "CLOSED"} onChange={() => onToggle(todo)}></input>
-                  {todo.title}
-                  {todo.attachmentCount > 0 && <span>attachments ({todo.attachmentCount})</span>}
-                  {onEdit && <button onClick={() => onEdit(todo)}>edit</button>}
-                  {onDelete && <button onClick={() => onDelete(todo)}>delete</button>}
-                </li>
-            ))}
-        </ul>
-    </>
+    <Section>
+        <SubHeader>{title}</SubHeader>
+        {todos.map(decorate).map(todo => (
+            <Card key={todo.id}>
+              <input type="checkbox" checked={todo.checked} onChange={() => onToggle(todo)}></input>
+              <p className={styles.listItemTitle}>
+                <span className={todo.checked ? styles.listItemTitleChecked : undefined}>{todo.title}</span>
+                {todo.attachmentCount > 0 && <small>attachments ({todo.attachmentCount})</small>}
+              </p>
+              <ButtonRow>
+                {onEdit && <button onClick={() => onEdit(todo)}>edit</button>}
+                {onDelete && <button onClick={() => onDelete(todo)}>delete</button>}
+              </ButtonRow>
+            </Card>
+        ))}
+    </Section>
   );
 };
 
@@ -48,17 +60,13 @@ const ToDoAdd = () => {
   });
 
   return (
-      <section>
-          <h1>Add ToDo</h1>
-          <form onSubmit={e => {
+      <section className={styles.addToDoSection}>
+        <form onSubmit={e => {
             e.preventDefault();
             updateUser();
           }}>
-              <label>
-                  title:
-                  <input name="title" type="text" required value={title} onChange={e => setTitle(e.target.value)} />
-              </label>
-              <input type="submit" />
+            <input placeholder="Add a to-do" name="title" type="text" required value={title} onChange={e => setTitle(e.target.value)} />
+            <input type="submit" value="save" />
           </form>
           {error && <p>{error.message}</p>}
       </section>
@@ -95,12 +103,13 @@ export const ListView = () => {
         variables: { id: todo.id },
         updateQueries: {
           visibleToDos: (previous, { mutationResult }): VisibleToDosQuery => {
+            const previousQuery = previous as VisibleToDosQuery;
             const updatedToDo = mutationResult.data?.openToDo;
-            if (!updatedToDo) return previous as VisibleToDosQuery;
-            const todos = (previous["todos"] as VisibleToDosQuery["todos"]).map(todo => {
+            if (!updatedToDo) return previousQuery;
+            const todos = previousQuery["todos"].map(todo => {
               return todo.id === updatedToDo.id ? updatedToDo : todo;
             });
-            return { todos };
+            return { ...previousQuery, todos };
           },
         },
       });
@@ -124,11 +133,12 @@ export const ListView = () => {
 
   return (
       <>
-        <h1>Caveman TODO app</h1>
-        <ToDoList title="To do" todos={openItems} onToggle={onToggleTodo} onDelete={onDeleteTodo} onEdit={onEditTodo} />
-        <ToDoList title="Done" todos={closedItems} onToggle={onToggleTodo} onDelete={onDeleteTodo} />
         <ToDoAdd />
-        <button onClick={() => refetch()}>Refresh</button>
+        <ToDoList title="todo" todos={openItems} onToggle={onToggleTodo} onDelete={onDeleteTodo} onEdit={onEditTodo} />
+        <ToDoList title="done" todos={closedItems} onToggle={onToggleTodo} onDelete={onDeleteTodo} />
+        <ButtonRow>
+          <button onClick={() => refetch()}>Refetch</button>
+        </ButtonRow>
       </>
   );
 };

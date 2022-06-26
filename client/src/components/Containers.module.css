@@ -1,0 +1,46 @@
+.appContainer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  padding: 2rem 1rem;
+}
+
+.contentContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.contentContainer > * {
+  width: 100%;
+  max-width: 600px;
+}
+
+.section {
+  padding-bottom: 1rem;
+}
+
+.card {
+  background-color: #f5f5f2;
+  padding: 0 0.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card + .card {
+  margin-top: 1rem;
+}
+
+.card * > * {
+  margin-left: 0.5rem;
+}
+
+.buttonRow {
+  display: flex;
+  justify-content: space-around;
+}

@@ -66,8 +66,8 @@ const resolvers = {
     todos: (_: never, variables: { statuses: Array<ToDo['status']> }) => {
       const { statuses } = variables;
       return (!statuses || statuses.length === 0)
-      ? todos
-      : todos.filter(todo => statuses.includes(todo.status));
+      ? todos.reverse()
+      : todos.filter(todo => statuses.includes(todo.status)).reverse();
     },
     todo: (_: never, variables: { id: string }) => {
       return getTodoById(variables.id);

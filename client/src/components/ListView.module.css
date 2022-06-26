@@ -1,0 +1,30 @@
+.listItemTitle {
+  flex-grow: 1;
+}
+
+.listItemTitleChecked {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.listItemTitle small {
+  font-size: 0.8em;
+  opacity: 0.6;
+}
+
+.addToDoSection form {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.addToDoSection input[type="text"] {
+  flex: 1;
+  border: 0;
+  background-color: #f5f5f2;
+  padding: 0.5rem;
+}
+
+.addToDoSection input {
+  margin-right: 0.5rem;
+}

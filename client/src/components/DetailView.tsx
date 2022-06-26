@@ -1,6 +1,9 @@
 import React from "react";
 import { DetailedToDoFragment, useEditToDoMutation, useToDoQuery } from "../generated/graphql";
 import { NavigationContext } from "../NavigationContext";
+import { ButtonRow, Card, Section } from "./Containers";
+import { SubHeader } from "./Headers";
+import styles from "./DetailView.module.css";
 
 const ToDoEdit = (props: { todo: DetailedToDoFragment }) => {
   const [formState, setFormState] = React.useState({
@@ -28,31 +31,33 @@ const ToDoEdit = (props: { todo: DetailedToDoFragment }) => {
   }, [editToDo, props.todo, formState]);
 
   return (
-    <form onSubmit={e => e.preventDefault()}>
-      <label>
-        title:
-        <input name="title" type="text" required value={formState.title} onChange={e => setFormState({ ...formState, title: e.target.value })} onBlur={flushChanges} />
-      </label>
-      <label>
-        body:
-        <textarea name="body" rows={5} value={formState.body} onChange={e => setFormState({ ...formState, body: e.target.value })} onBlur={flushChanges} />
-      </label>
-    </form>
+    <Card>
+      <form className={styles.todoForm} onSubmit={e => e.preventDefault()}>
+        <label htmlFor="title">title:</label>
+        <input id="title" type="text" required value={formState.title} onChange={e => setFormState({ ...formState, title: e.target.value })} onBlur={flushChanges} />
+        <label htmlFor="body">body:</label>
+        <textarea id="body" rows={5} value={formState.body} onChange={e => setFormState({ ...formState, body: e.target.value })} onBlur={flushChanges} />
+      </form>
+    </Card>
   )
 };
 
 const AttachmentsList = (props: { attachments: DetailedToDoFragment["attachments"] }) => {
+  if (!props.attachments) return null;
+
   return (
-    <>
-      <h2>Attachments</h2>
-      <ul>
+    <Section>
+      <SubHeader>Attachments</SubHeader>
+      <Card>
+        <ul className={styles.attachmentsList}>
           {props.attachments.map(att => (
             <li key={att.id}>
               {att.name}
             </li>
           ))}
-      </ul>
-    </>
+        </ul>
+      </Card>
+    </Section>
   );
 }
 
@@ -61,19 +66,20 @@ export const DetailView = (props: { toDoId: string }) => {
   const { data } = useToDoQuery({
     variables: { id: props.toDoId },
   });
-
   const todo = data?.todo;
 
   return (
-    <section>
-      <h1>DetailView</h1>
+    <Section>
+      <SubHeader>Details</SubHeader>
       {todo && (
         <>
           <ToDoEdit todo={todo} />
           <AttachmentsList attachments={todo.attachments || []} />
         </>
       )}
-      <button onClick={() => setActiveView('ListView')}>back</button>
-    </section>
+      <ButtonRow>
+        <button onClick={() => setActiveView('ListView')}>back</button>
+      </ButtonRow>
+    </Section>
   );
 };
