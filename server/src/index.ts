@@ -91,7 +91,7 @@ const resolvers = {
     },
     editToDo: async (_: never, variables: { id: string, changes: { title?: string, body?: string }}): Promise<ToDo> => {
       // use to demo optimistic response
-      // await delay(3000);
+      // await delay(5000);
       // if (true) throw "oops";
       return updateTodo(variables.id, todo => {
         const { title, body } = variables.changes;

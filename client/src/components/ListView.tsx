@@ -2,7 +2,6 @@ import React from "react";
 import { NavigationContext } from "../NavigationContext";
 import {
   AbbreviatedToDoFragment,
-  VisibleToDosQuery,
   VisibleToDosDocument,
   useAddToDoMutation,
   useCheckToDoMutation,
@@ -55,7 +54,21 @@ const ToDoAdd = () => {
 
   const [updateUser, { error }] = useAddToDoMutation({
     variables: todoInput,
+    // example of updating the cache by re-fetching query
     refetchQueries: [VisibleToDosDocument],
+    // example of updating the cache without re-fetching
+    // updateQueries: {
+    //   visibleToDos: (previous, { mutationResult }): VisibleToDosQuery => {
+    //     const previousQuery = previous as VisibleToDosQuery;
+    //     const newToDo = mutationResult.data?.createToDo;
+    //     if (!newToDo) return previousQuery;
+    //     const todos = [
+    //       newToDo,
+    //       ...previousQuery["todos"],
+    //     ];
+    //     return { ...previousQuery, todos };
+    //   },
+    // },
     onCompleted: () => setTitle(""),
   });
 
@@ -90,28 +103,14 @@ export const ListView = () => {
   if (error) return <h1>Error {JSON.stringify(error)}</h1>;
 
   const onToggleTodo = (todo: AbbreviatedToDoFragment) => {
-    // example of updating the cache by re-fetching query
     if (todo.status === "OPEN") {
       checkToDo({
         variables: { id: todo.id },
-        refetchQueries: [VisibleToDosDocument],
       });
     }
-    // example of updating the cache without re-fetching
     if (todo.status === "CLOSED") {
       uncheckToDo({
         variables: { id: todo.id },
-        updateQueries: {
-          visibleToDos: (previous, { mutationResult }): VisibleToDosQuery => {
-            const previousQuery = previous as VisibleToDosQuery;
-            const updatedToDo = mutationResult.data?.openToDo;
-            if (!updatedToDo) return previousQuery;
-            const todos = previousQuery["todos"].map(todo => {
-              return todo.id === updatedToDo.id ? updatedToDo : todo;
-            });
-            return { ...previousQuery, todos };
-          },
-        },
       });
     }
   };
